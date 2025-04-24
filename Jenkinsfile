@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Code') {
             steps {
-                git 'https://github.com/heinsetwink/jenkins-lab-demo.git'
+                git branch: 'main', url: 'https://github.com/heinsetwink/jenkins-lab-demo.git'
             }
         }
         stage('Build') {
