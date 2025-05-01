@@ -18,6 +18,12 @@ pipeline {
                 sh 'python3 -m unittest discover -s . -p "*.py"'
             }
         }
+        stage('Run') {
+            steps {
+                echo 'Running the Python app...'
+                sh 'python3 app.py'
+            }
+        }
         stage('Deploy') {
             steps {
                 echo 'Deploy step (simulated)...'
