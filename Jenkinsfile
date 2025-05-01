@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        VENV = 'venv'
+    }
+
     stages {
         stage('Clone Code') {
             steps {
@@ -10,21 +14,22 @@ pipeline {
 
         stage('Set Up Virtual Environment') {
             steps {
-                sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                '''
+                sh 'python3 -m venv $VENV'
+                sh './$VENV/bin/pip install --upgrade pip'
+                sh './$VENV/bin/pip install -r requirements.txt'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh './$VENV/bin/python -m unittest discover -s . -p "test_*.py"'
             }
         }
 
         stage('Run App') {
             steps {
-                sh '''
-                    . venv/bin/activate
-                    nohup python app.py &
-                '''
+                echo 'Starting Flask app...'
+                sh 'nohup ./$VENV/bin/python3 app.py > app.log 2>&1 &'
             }
         }
     }
