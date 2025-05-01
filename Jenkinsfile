@@ -2,37 +2,25 @@ pipeline {
     agent any
 
     environment {
-        // Define virtual environment directory and app directory (modify as per your setup)
-        VENV_DIR = 'venv'
-        APP_DIR = 'app.py'
+        VENV_PATH = './venv'
     }
 
     stages {
-        stage('Declarative: Checkout SCM') {
+        stage('Checkout SCM') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Clone Code') {
-            steps {
-                script {
-                    // Clone the repository and checkout the code
-                    sh 'git clone https://github.com/heinsetwink/jenkins-lab-demo.git'
-                    dir('jenkins-lab-demo') {
-                        sh 'git checkout main'
-                    }
-                }
             }
         }
 
         stage('Set Up Virtual Environment') {
             steps {
                 script {
-                    // Create a virtual environment if not already created
-                    sh 'python3 -m venv ${VENV_DIR}'
-                    sh './${VENV_DIR}/bin/pip install --upgrade pip'
-                    sh './${VENV_DIR}/bin/pip install -r requirements.txt'
+                    // Create virtual environment if it doesn't exist
+                    if (!fileExists(VENV_PATH)) {
+                        sh 'python3 -m venv venv'
+                    }
+                    sh './venv/bin/pip install --upgrade pip'
+                    sh './venv/bin/pip install -r requirements.txt'
                 }
             }
         }
@@ -40,8 +28,8 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Run tests using unittest
-                    sh './${VENV_DIR}/bin/python -m unittest discover -s . -p test_*.py'
+                    // Run the tests
+                    sh './venv/bin/python -m unittest discover -s . -p "test_*.py"'
                 }
             }
         }
@@ -49,16 +37,22 @@ pipeline {
         stage('Run App') {
             steps {
                 script {
-                    // Run Flask app in the background using nohup
-                    sh 'nohup ./${VENV_DIR}/bin/python ${APP_DIR} > flask.log 2>&1 &'
+                    // Run the app with nohup
+                    sh 'nohup ./venv/bin/python app.py &'
                 }
+            }
+        }
+
+        stage('Post Actions') {
+            steps {
+                echo 'Cleaning up after the pipeline'
             }
         }
     }
 
     post {
         always {
-            echo 'Cleaning up after the pipeline'
+            cleanWs()
         }
     }
 }
