@@ -7,26 +7,15 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/heinsetwink/jenkins-lab-demo.git'
             }
         }
-        stage('Build') {
+        stage('Install Requirements') {
             steps {
-                echo 'Nothing to build. Just Python files.'
+                sh 'pip3 install -r requirements.txt'
             }
         }
-        stage('Test') {
+        stage('Run App') {
             steps {
-                echo 'Running unit tests...'
-                sh 'python3 -m unittest discover -s . -p "*.py"'
-            }
-        }
-        stage('Run') {
-            steps {
-                echo 'Running the Python app...'
-                sh 'python3 app.py'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploy step (simulated)...'
+                echo 'Starting Flask app...'
+                sh 'nohup python3 app.py &'
             }
         }
     }
