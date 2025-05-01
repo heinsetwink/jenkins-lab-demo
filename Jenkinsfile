@@ -7,15 +7,24 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/heinsetwink/jenkins-lab-demo.git'
             }
         }
-        stage('Install Requirements') {
+
+        stage('Set Up Virtual Environment') {
             steps {
-                sh 'pip3 install -r requirements.txt'
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
+
         stage('Run App') {
             steps {
-                echo 'Starting Flask app...'
-                sh 'nohup python3 app.py &'
+                sh '''
+                    . venv/bin/activate
+                    nohup python app.py &
+                '''
             }
         }
     }
